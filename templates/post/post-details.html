@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+    {% block content %}
+    <a href="{% url 'index' %}" class="btn btn-outline-light">
+        <span class="fas fa-home"></span> Home
+    </a>
+    <div class="container">
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card post-details bg-dark text-white border-0 my-5">
+                    <!-- Post Image -->
+                    <img class="card-img-top rounded-0 img-fluid" src="{{ post.image.url }}" alt="Post Image">
+                    
+                    <!-- Post Content -->
+                    <div class="card-body p-5">
+                        <!-- Post Title -->
+                        <h1 class="card-title text-white">{{ post.title }}</h1>
+                        
+                        <!-- Post Meta Data -->
+                        <ul class="post-meta list-inline text-muted my-3">
+                            <li class="list-inline-item mr-3">
+                                <span class="fas fa-clock text-primary"></span>
+                                <span class="ml-1">{{ post.created_at|date:"F j, Y, g:i a" }}</span>
+                            </li>
+                            <li class="list-inline-item mr-3">
+                                <span class="fas fa-user-alt text-primary"></span>
+                                <a class="ml-1 text-white" href="{% url 'profile' post.user.username %}">{{ post.user.username }}</a>
+                            </li>
+                            <li class="list-inline-item mr-3">
+                                <span class="fas fa-thumbs-up text-primary"></span>
+                                <span class="ml-1">{{ post.total_likes }} Likes</span>
+                            </li>
+                        </ul>
+    
+                        <!-- Post Full Caption -->
+                        <p class="card-text my-4">
+                            {{ post.caption }}
+                        </p>
+    
+                        
+                        <!-- Post Action Buttons -->
+                        <div class="post-actions">
+                            <button class="btn btn-outline-primary like-btn" data-post-id="{{ post.id }}">
+                                {% if is_liked %}
+                                <span class="fas fa-heart"></span> Unlike
+                                {% else %}
+                                <span class="fa-regular fa-heart"></span> Like
+                                {% endif %}
+                            </button>
+                            <a href="#" class="btn btn-outline-secondary">
+                                <span class="fas fa-comments"></span> Comment
+                            </a>
+                            <a href="#" class="btn btn-outline-info">
+                                <span class="fas fa-share"></span> Share
+                            </a>
+                        </div>
+                    </div>
+    
+                    <!-- Comment Section -->
+                    <div class="card-footer bg-transparent">
+                        <h4 class="text-white">Comments</h4>
+                        <div class="comments mt-3">
+                            <!-- Loop through comments -->
+                            {% for comment in comments %}
+                            <div class="comment mb-4">
+                                <div class="d-flex align-items-center">
+                                    {% if comment.user.profile.profile_img %}
+                                        <img src="{{ comment.user.profile.profile_img.url }}" class="rounded-circle" alt="User Avatar" width="50" height="50">
+                                    {% else %}
+                                        <img src="{% static 'images/author-sm.png' %}" class="rounded-circle" alt="Default Avatar" width="50" height="50">
+                                    {% endif %}
+                                    <div class="ml-3">
+                                        <h5 class="mb-0 text-white">{{ comment.user.username }}</h5>
+                                        <small class="text-muted">{{ comment.created_at|date:"Y/m/d H:i" }}</small>
+                                    </div>
+                                </div>
+                                <p class="mt-2">{{ comment.content }}</p>
+                            </div>
+                            {% empty %}
+                            <p class="text-muted">No comments yet. Be the first to comment!</p>
+                            {% endfor %}
+                        </div>
+                    
+                        <!-- Add Comment Form -->
+                        {% if user.is_authenticated %}
+                        <form method="post" class="mt-4">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <textarea name="comment" class="form-control" rows="3" placeholder="Add a comment..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                        {% else %}
+                        <p class="text-muted">You need to <a href="{% url 'login' %}">log in</a> to comment.</p>
+                        {% endif %}
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const likeButtons = document.querySelectorAll('.like-btn');
+    
+        likeButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const postId = this.getAttribute('data-post-id');
+    
+                fetch(`/post/like/${postId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({}),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.liked) {
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-danger');
+                        btn.innerHTML = '<span class="fas fa-heart"></span> Unlike';
+                    } else {
+                        btn.classList.remove('btn-danger');
+                        btn.classList.add('btn-outline-primary');
+                        btn.innerHTML = '<span class="fa-regular fa-heart"></span> Like';
+                    }
+                    document.getElementById('likes-count-' + postId).textContent = data.total_likes + ' Likes';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+    });
+    
+    </script>
+{% endblock content %}

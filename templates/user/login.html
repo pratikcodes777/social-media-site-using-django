@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<!-- <aside><div>
+    <a class="navbar-brand" href="index.html" class="logo">
+        <img src="{% static 'images/logo.png' %}" alt="">
+    </a> -->
+
+    <aside>
+        <div class="container d-flex justify-content-center align-items-center min-vh-100">
+            <div class="col-md-6">
+                <div class="contact-form bg-dark p-5 rounded shadow">
+                {% include 'messages.html' %}
+
+                    <h1 class="text-white mb-4 text-center">Login Now</h1>
+                    <form method="POST" class="needs-validation" >
+                        {% csrf_token %}
+                        <div class="form-group mb-4">
+                            <label for="username" class="text-white">Username</label>
+                            <input type="text" id="username" name="username" class="form-control bg-transparent border-light text-white shadow-none" placeholder="Enter your username" required>
+                            <p class="invalid-feedback">Username is required!</p>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="password" class="text-white">Password</label>
+                            <input type="password" id="password" name="password" class="form-control bg-transparent border-light text-white shadow-none" placeholder="Enter your password" required>
+                            <p class="invalid-feedback">Password is required!</p>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-block py-2">Log In</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-4">
+                        <small class="text-white">Dont have an account? <a href="{% url 'register' %}" class="text-primary">Sign Up</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+{% endblock content %}

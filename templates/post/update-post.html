@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid min-vh-100">
+    <div class="row">
+        <!-- Sidebar Section -->
+        <div class="col-md-3">
+            <aside class="sidenav d-flex flex-column justify-content-between bg-dark vh-100 p-4">
+                <a class="navbar-brand text-center" href="{% url 'index' %}" class="logo">
+                    <img src="{% static 'images/logo.png' %}" alt="Logo" class="img-fluid" width="100px">
+                </a>
+                <!-- Navbar Links -->
+                <div class="navbar navbar-dark mt-5 font-primary">
+                    <ul class="navbar-nav w-100">
+                        <li class="nav-item active">
+                            <a class="nav-link text-white px-0 pt-0" href="{% url 'index' %}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white px-0" href="about.html">About</a>
+                        </li>
+                        {% if not user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white px-0" href="{% url 'register' %}">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white px-0" href="{% url 'login' %}">Login</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white px-0" href="{% url 'create-post' %}">Create Post</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white px-0" href="{% url 'settings' %}">Account Settings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white px-0" href="{% url 'logout' %}">Logout</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </aside>
+        </div>
+        <!-- End Sidebar Section -->
+
+        <!-- Form Section -->
+        <div class="col-md-9 d-flex justify-content-center align-items-center min-vh-100">
+            <div class="col-md-8">
+                <div class="contact-form bg-dark p-5 rounded shadow">
+                    {% include 'messages.html' %}
+                    <h1 class="text-white mb-4 text-center">Update Post</h1>
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation">
+                        {% csrf_token %}
+                        <div class="form-group mb-4">
+                            <label for="title" class="text-white">Title</label>
+                            <input type="text" name="title" class="form-control bg-transparent border-light text-white shadow-none" value="{{post.title}}">
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="caption" class="text-white">Caption</label>
+                            <textarea id="caption" name="caption" class="form-control bg-transparent border-light text-white shadow-none" rows="4">{{post.caption}}</textarea>
+                        </div>
+                        {% if post.image %}
+                            <img src="{{ post.image.url }}" alt="Current Image" style="max-width: 300px;">
+                            <p>Current Image</p>
+                        {% endif %}
+                        <div class="form-group mb-4">
+                            <label for="profilePicture" class="text-white">Update Image</label>
+                            <input type="file" name="image" class="form-control-file bg-transparent border-light text-white shadow-none">
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-block py-2">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- End Form Section -->
+    </div>
+</div>
+
+{% endblock content %}
