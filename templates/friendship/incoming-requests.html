@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<section class="d-flex">
+    <!-- Sidebar remains the same -->
+    <aside>
+        <div class="sidenav position-sticky d-flex flex-column justify-content-between">
+            <a class="navbar-brand" href="{% url 'index' %}" class="logo">
+                <img src="{% static 'images/logo.png' %}" alt="">
+            </a>
+
+            {% include 'navbar.html' %}
+
+            <ul class="list-inline">
+                <li class="list-inline-item">
+                    <a href="#!" class="text-white text-red-onHover pr-2">
+                        <span class="fab fa-twitter"></span>
+                    </a>
+                </li>
+                <li class="list-inline-item">
+                    <a href="#!" class="text-white text-red-onHover p-2">
+                        <span class="fab fa-facebook-f"></span>
+                    </a>
+                </li>
+                <li class="list-inline-item">
+                    <a href="#!" class="text-white text-red-onHover p-2">
+                        <span class="fab fa-instagram"></span>
+                    </a>
+                </li>
+                <li class="list-inline-item">
+                    <a href="#!" class="text-white text-red-onHover p-2">
+                        <span class="fab fa-linkedin-in"></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <div class="main-content w-100">
+        <div class="container pt-4 mt-5">
+            <div class="row justify-content-between">
+                <!-- Left section: Incoming Friend Requests -->
+                <div class="col-lg-7">
+                    {% include 'messages.html' %}
+                    <h2 class="text-white mb-4">Incoming Friend Requests</h2>
+
+                    {% if all_requests %}
+                        <ul class="list-unstyled">
+                            {% for request in all_requests %}
+                                <li class="card post-item bg-transparent border-0 mb-4">
+                                    <div class="card-body px-0 d-flex align-items-center justify-content-between">
+                                        <img src="{{ request.user_from.profile.profile_img.url }}"  class="rounded-circle mr-2" width="40" height="40">
+
+                                        <div style="margin-left: -150px;">
+
+                                            <h4 class="card-title mb-0">
+                                                {{ request.user_from.username }}
+                                            </h4>
+                                            <p class="text-muted">sent you a friend request</p>
+                                        </div>
+                                        <div>
+                                            <a href="{% url 'accept-friend' request.user_from.id %}" class="btn btn-success mr-2">Accept</a>
+                                            <a href="{% url 'reject-friend' request.user_from.id %}" class="btn btn-danger">Reject</a>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-white">No incoming friend requests.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Right section: My Friends -->
+                <div class="col-lg-4">
+                    <h2 class="text-white mb-4">My Friends</h2>
+                
+                    {% if my_friends %}
+                        <ul class="list-group">
+                            {% for friend in my_friends %}
+                                <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <!-- Profile Picture -->
+                                        {% if friend.user_from == request.user %}
+                                            <img src="{{ friend.user_to.profile.profile_img.url }}"  class="rounded-circle mr-3" width="40" height="40">
+                                            <span>{{ friend.user_to.username }}</span>
+                                        {% else %}
+                                            <img src="{{ friend.user_from.profile.profile_img.url }}" class="rounded-circle mr-3" width="40" height="40">
+                                            <span>{{ friend.user_from.username }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if friend.user_from == request.user %}
+                                    <a href="{% url 'remove-friend' friend.user_to.id %}" class="btn btn-danger btn-sm">Unfriend</a>
+                                    {% else %}
+                                    <a href="{% url 'remove-friend' friend.user_from.id %}" class="btn btn-danger btn-sm">Unfriend</a>
+                                    {% endif %}
+
+
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-white">You have no friends yet.</p>
+                    {% endif %}
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

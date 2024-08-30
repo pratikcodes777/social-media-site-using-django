@@ -8,5 +8,6 @@ urlpatterns = [
     path('like/<uuid:post_id>/' , views.like_post , name='like-post'),
     path('update/<uuid:id>/' , views.update_post , name='update-post'),
     path('my-posts/delete/<uuid:id>/' , views.delete , name='delete'),
+    path('search/' , views.search , name='search'),
 
 ]

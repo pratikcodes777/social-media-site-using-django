@@ -19,6 +19,7 @@ def create_post(request):
     return render(request, 'post/create_post.html')
 
 
+'''
 
 def post_details(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -26,9 +27,7 @@ def post_details(request, post_id):
     
     is_liked = False
     if request.user.is_authenticated:
-        print(Like.objects.filter(post=post, user=request.user).exists())
         is_liked = Like.objects.filter(post=post, user=request.user).exists()
-    print(f'Post ID: {post.id}, User ID: {request.user.id}, Is Liked: {is_liked}')
 
     if request.method == 'POST':
         content = request.POST.get('comment')
@@ -49,6 +48,40 @@ def post_details(request, post_id):
 
     return render(request, 'post/post-details.html', context)
 
+'''
+
+
+def post_details(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    comments = post.comments.filter(parent=None)  
+    
+    is_liked = False
+    if request.user.is_authenticated:
+        is_liked = Like.objects.filter(post=post, user=request.user).exists()
+
+    if request.method == 'POST':
+        content = request.POST.get('comment')
+        parent_id = request.POST.get('parent_id')
+        parent_comment = None
+        if parent_id:  
+            parent_comment = Comment.objects.get(id=parent_id)
+
+        if content:
+            Comment.objects.create(
+                post=post,
+                user=request.user,
+                content=content,
+                parent=parent_comment  # If parent_comment is None, it's a top-level comment on the post
+            )
+            return redirect('post-details', post_id=post.id)
+
+    context = {
+        'post': post,
+        'comments': comments,
+        'is_liked': is_liked
+    }
+
+    return render(request, 'post/post-details.html', context)
 
 
 
@@ -65,6 +98,7 @@ def my_posts(request):
         'profile':profile
     }
     return render(request, 'post/my-posts.html', context)
+
 
 
 def update_post(request , id):
@@ -93,21 +127,6 @@ def delete(request , id):
 
 
 
-# def like_post(request, post_id):
-#     post = get_object_or_404(Post, id=post_id)
-#     user = request.user
-#     like_exists = Like.objects.filter(user=user, post=post).exists()
-
-#     if like_exists:
-
-#         Like.objects.filter(user=user, post=post).delete()
-#     else:
-
-#         Like.objects.create(user=user, post=post)
-
-#     return redirect('index')
-
-
 def like_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     user = request.user
@@ -124,3 +143,17 @@ def like_post(request, post_id):
         'liked': liked,
         'total_likes': post.total_likes(),
     })
+
+
+def search(request):
+    if request.method == 'POST':
+        search_query = request.POST.get('search_query')
+        posts = Post.objects.filter(title__icontains=search_query)
+        context = {
+            'search_query': search_query,
+            'posts': posts,  
+        }
+        return render(request, 'post/search-results.html', context)
+
+    return render(request, 'post/search-results.html')
+

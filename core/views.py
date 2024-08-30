@@ -3,10 +3,16 @@ from django.contrib import auth
 from django.contrib import messages
 from .models import User, Profile
 from post.models import Post
+from friendship.models import Friendship
+from django.core.paginator import Paginator
+from django.db.models import Q
 # Create your views here.
 
 def index(request):
     all_posts = Post.objects.all().order_by('-created_at')
+    paginator = Paginator(all_posts , 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     profile = None
     if request.user.is_authenticated:
         try:
@@ -24,6 +30,7 @@ def index(request):
     context = {
         'profile': profile,
         'all_posts': all_posts,
+        'page_obj': page_obj,
     }
     return render(request, 'index.html', context)
 
@@ -106,17 +113,49 @@ def settings(request):
 #     return render(request, 'user/profile.html', context)
 
 
-def profile(request , username):
-    user = get_object_or_404(User, username=username)  
-    profile = get_object_or_404(Profile, user=user)
-    current_user = request.user
-    context ={
+# def profile(request , username):
+#     user = get_object_or_404(User, username=username)  
+#     profile = get_object_or_404(Profile, user=user)
+#     current_user = request.user
+
+#     context ={
+#         'profile': profile,
+#         'user': user,
+#         'current_user': current_user,
+#         'is_friend': is_friend,
+#         'friend_request_pending': friend_request_pending,
+#     }
+#     return render(request, 'user/profile.html', context)
+
+
+# views.py
+def profile(request, username):
+    user_profile = get_object_or_404(User, username=username)
+    profile = get_object_or_404(Profile, user=user_profile)
+
+    is_friend = Friendship.objects.filter(
+        (Q(user_from=request.user) & Q(user_to=user_profile) & Q(status='Accepted')) |
+        (Q(user_from=user_profile) & Q(user_to=request.user) & Q(status='Accepted'))
+    ).exists()
+    
+
+    friend_request_pending = Friendship.objects.filter(
+        user_from=request.user, user_to=user_profile, status='Pending'
+    ).exists()
+
+
+    friend_request_received = Friendship.objects.filter(
+        user_from=user_profile, user_to=request.user, status='Pending'
+    ).exists()
+
+    context = {
         'profile': profile,
-        'user': user,
-        'current_user': current_user
+        'user': user_profile,
+        'is_friend': is_friend,
+        'friend_request_pending': friend_request_pending,
+        'friend_request_received': friend_request_received,
     }
     return render(request, 'user/profile.html', context)
-
 
 
 

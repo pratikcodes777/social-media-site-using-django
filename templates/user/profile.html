@@ -6,7 +6,9 @@
 </a>
     <aside>
         <div class="container d-flex justify-content-center align-items-center min-vh-100">
+            
             <div class="col-md-6">
+                {% include 'messages.html' %}
                 <div class="profile-view bg-dark p-5 rounded shadow text-center">
                     <!-- Profile Picture -->
                     <img src="{{ profile.profile_img.url }}" alt="Profile Picture" class="rounded-circle mb-4" style="width: 150px; height: 150px; object-fit: cover;">
@@ -28,15 +30,36 @@
                     </div>
 
                     <!-- Edit Profile Button -->
-                     {% if user == current_user %}
-                    <div class="text-center mt-5">
-                        <a href="{% url 'settings' %}" class="btn btn-primary">Edit Profile</a>
-                    </div>
+                    {% if user == request.user %}
+    <!-- If the current profile is the logged-in user -->
+                        <div class="text-center mt-5">
+                            <a href="{% url 'settings' %}" class="btn btn-primary">Edit Profile</a>
+                        </div>
+                    {% elif is_friend %}
+                        <!-- If they are already friends, show remove friend option -->
+                        <div class="text-center mt-5">
+                            <a href="{% url 'remove-friend' user.id %}" class="btn btn-danger">Remove Friend</a>
+                        </div>
+                    {% elif friend_request_received %}
+                        <!-- If the current user received a request, show accept/reject options -->
+                        <div class="text-center mt-5">
+                            <a href="{% url 'accept-friend' user.id %}" class="btn btn-success">Accept</a>
+                            <a href="{% url 'reject-friend' user.id %}" class="btn btn-danger">Reject</a>
+                        </div>
+                    {% elif friend_request_pending %}
+                        <!-- If the current user has already sent a request, show cancel option -->
+                        <div class="text-center mt-5">
+                            <a href="{% url 'add-friend' user.id %}" class="btn btn-warning">Cancel Request</a>
+                        </div>
                     {% else %}
-                    <div class="text-center mt-5">
-                        <a href="" class="btn btn-info">Add Friend</a>
-                    </div>
+                        <!-- No friend request, show add friend option -->
+                        <div class="text-center mt-5">
+                            <a href="{% url 'add-friend' user.id %}" class="btn btn-info">Add Friend</a>
+                        </div>
                     {% endif %}
+
+
+                
                 </div>
             </div>
         </div>

@@ -11,34 +11,8 @@
                     <img src="{% static 'images/logo.png' %}" alt="Logo" class="img-fluid" width="100px">
                 </a>
                 <!-- Navbar Links -->
-                <div class="navbar navbar-dark mt-5 font-primary">
-                    <ul class="navbar-nav w-100">
-                        <li class="nav-item active">
-                            <a class="nav-link text-white px-0 pt-0" href="{% url 'index' %}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white px-0" href="about.html">About</a>
-                        </li>
-                        {% if not user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link text-white px-0" href="{% url 'register' %}">Register</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white px-0" href="{% url 'login' %}">Login</a>
-                        </li>
-                        {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link text-white px-0" href="{% url 'create-post' %}">Create Post</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white px-0" href="{% url 'settings' %}">Account Settings</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white px-0" href="{% url 'logout' %}">Logout</a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </div>
+                {% include 'navbar.html' %}
+
             </aside>
         </div>
         <!-- End Sidebar Section -->

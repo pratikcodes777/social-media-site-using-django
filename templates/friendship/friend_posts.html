@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<body>
+    <!-- START main-wrapper -->
+    <section class="d-flex">
+  
+<!-- start of sidenav -->
+<aside><div class="sidenav position-sticky d-flex flex-column justify-content-between">
+    <a class="navbar-brand" href="{% url 'index' %}" class="logo">
+        <img src="{% static 'images/logo.png' %}" alt="">
+    </a>
+    <!-- end of navbar-brand -->
+
+    {% include 'navbar.html' %}
+
+    <!-- end of navbar -->
+
+</div></aside>
+<!-- end of sidenav -->
+    <div class="main-content">
+
+{% include 'messages.html' %}
+        <div class="container pt-4 mt-5">
+            <div class="row justify-content-between">
+                <div class="col-lg-7">
+                    {% for post in posts %}
+                    <div class="card post-item bg-transparent border-0 mb-5">
+                        <a href="{% url 'post-details' post.id %}">
+                            <img class="card-img-top rounded-0" src="{{post.image.url}}" alt="">
+                        </a>
+                        <div class="card-body px-0">
+                            <h2 class="card-title">
+                                <a class="text-white opacity-75-onHover" href="{% url 'post-details' post.id %}">{{post.title}}</a>
+                            </h2>
+                            <ul class="post-meta mt-3">
+                                <li class="d-inline-block mr-3">
+                                    <span class="fas fa-clock text-primary"></span>
+                                    <a class="ml-1" href="#">{{ post.created_at|date:"F j, Y" }}</a>
+                                </li>
+                                <li class="d-inline-block">
+                                    <span class="fas fa-user-alt text-primary"></span>
+                                    <a class="ml-1" href="{% url 'profile' post.user.username %}" style="margin-right: 30px;">
+                                        {{post.user.username}}
+                                    </a>
+                
+                                    {% if user.is_authenticated %}
+                                    <button class="btn btn-outline-primary like-btn" data-post-id="{{ post.id }}">
+                                        {% if post.is_liked %}
+                                        <span class="fas fa-heart"></span> Unlike
+                                        {% else %}
+                                        <span class="fa-regular fa-heart"></span> Like
+                                        {% endif %}
+                                    </button>
+                                    {% endif %}
+                                    <span id="likes-count-{{ post.id }}">{{ post.total_likes }} Likes</span>
+                                </li>
+                            </ul>
+                            <p class="card-text my-4">{{post.caption}}</p>
+                            <a href="{% url 'post-details' post.id %}" class="btn btn-primary">
+                                Read More <img src="{% static 'images/arrow-right.png' %}" alt="">
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <!-- end of post-item -->
+                </div>
+
+
+
+
+
+</body>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const likeButtons = document.querySelectorAll('.like-btn');
+    
+        likeButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const postId = this.getAttribute('data-post-id');
+    
+                fetch(`/post/like/${postId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({}),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.liked) {
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-danger');
+                        btn.innerHTML = '<span class="fas fa-heart"></span> Unlike';
+                    } else {
+                        btn.classList.remove('btn-danger');
+                        btn.classList.add('btn-outline-primary');
+                        btn.innerHTML = '<span class="fa-regular fa-heart"></span> Like';
+                    }
+                    document.getElementById('likes-count-' + postId).textContent = data.total_likes + ' Likes';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+    });
+    
+    </script>
+{% endblock content %}

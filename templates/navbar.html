@@ -1,0 +1,35 @@
+<div class="navbar navbar-dark my-4 p-0 font-primary">
+    <ul class="navbar-nav w-100">
+        <li class="nav-item active">
+            <a class="nav-link text-white px-0 pt-0" href="{% url 'index' %}">Home</a>
+        </li>
+        <li class="nav-item ">
+            <a class="nav-link text-white px-0" href="{% url 'my-posts' %}">My Posts</a>
+        </li>
+        {% if not user.is_authenticated %}
+        <li class="nav-item ">
+            <a class="nav-link text-white px-0" href="{% url 'register' %}">Register</a>
+        </li>
+        <li class="nav-item ">
+            <a class="nav-link text-white px-0" href="{% url 'login' %}">Login</a>
+        </li>
+        {% else %}
+        <li class="nav-item ">
+            <a class="nav-link text-white px-0" href="{% url 'create-post' %}">Create Post</a>
+        </li>
+        <li class="nav-item ">
+            <a class="nav-link text-white px-0" href="{% url 'incoming-requests' %}">Requests</a>
+        </li>
+        <li class="nav-item ">
+            <a class="nav-link text-white px-0" href="{% url 'friend-post' %}">My Friend's Post</a>
+        </li>
+        <li class="nav-item ">
+            <a class="nav-link text-white px-0" href="{% url 'settings' %}">Account Settings</a>
+        </li>
+        <li class="nav-item ">
+            <a class="nav-link text-white px-0" href="{% url 'logout' %}">Logout</a>
+        </li>
+        {% endif %}
+
+    </ul>
+</div>
