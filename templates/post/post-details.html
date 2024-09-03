@@ -29,8 +29,9 @@
                             </li>
                             <li class="list-inline-item mr-3">
                                 <span class="fas fa-thumbs-up text-primary"></span>
-                                <span class="ml-1">{{ post.total_likes }} Likes</span>
+                                <span id="likes-count-{{ post.id }}" class="ml-1">{{ post.total_likes }} Likes</span>
                             </li>
+                            
                         </ul>
     
                         <!-- Post Full Caption -->
@@ -58,12 +59,12 @@
                     </div>
     
                     <!-- Comment Section -->
-                        <div class="card-footer bg-transparent">
-                            <h4 class="text-white">Comments</h4>
-                            <div class="comments mt-3">
-                                <!-- Loop through top-level comments -->
-                                {% for comment in comments %}
-                                <div class="comment mb-4">
+                    <div class="card-footer bg-transparent">
+                        <h4 class="text-white">Comments</h4>
+                        <div id="comments-section" class="comments mt-3">
+                            <!-- Loop through top-level comments -->
+                            {% for comment in comments %}
+                                <div class="comment mb-4" id="comment-{{ comment.id }}">
                                     <div class="d-flex align-items-center">
                                         {% if comment.user.profile.profile_img %}
                                             <img src="{{ comment.user.profile.profile_img.url }}" class="rounded-circle" alt="User Avatar" width="50" height="50">
@@ -78,47 +79,51 @@
                                     <p class="mt-2">{{ comment.content }}</p>
 
                                     <!-- Replies -->
-                                    <div class="replies ml-4">
-                                        {% for reply in comment.replies.all %}
-                                        <div class="reply mb-3">
-                                            <p class="text-muted">{{ reply.user.username }} replied:</p>
-                                            <p>{{ reply.content }}</p>
-                                        </div>
-                                        {% endfor %}
+                                        <div id="replies">
+                                    <div id="replies-{{ comment.id }}" class="replies ml-4">
+                                        {% include 'comment/reply_partial.html' with comments=comment.replies.all %}
                                     </div>
-
-                                    <!-- Reply Form -->
+                                        </div>
+                                    <!-- Reply Form for Top-Level Comments -->
                                     {% if user.is_authenticated %}
-                                    <form method="post" class="mt-2">
+                                    <form method="post" id="reply-form-{{ comment.id }}" 
+                                        hx-post="{% url 'post-details' post.id %}" 
+                                        hx-target="#replies-{{ comment.id }}" 
+                                        hx-swap="beforeend"
+                                        hx-debug="true">
                                         {% csrf_token %}
                                         <input type="hidden" name="parent_id" value="{{ comment.id }}">
-                                        <div class="form-group" style="margin-left: 25px;">
-                                            <textarea name="comment" class="form-control" rows="1" placeholder="Reply to this comment..." style="border: 1px dotted rgb(241, 178, 133); padding-left: 25px; max-width: 450px;"  ></textarea>
-                                             <!-- <input type="text" name="comment" class="form-control-plaintext" placeholder="Reply to this comment" style="color: aliceblue; border: 1px dotted rgb(241, 178, 133); padding-left: 25px; max-width: 450px;"  > -->
+                                        <div class="form-group">
+                                            <textarea name="comment" class="form-control" rows="1" placeholder="Reply to this comment..." 
+                                                style="border: 1px dotted rgb(241, 178, 133); padding-left: 25px; max-width: 450px;"></textarea>
                                         </div>
-                                        <button type="submit" class="badge text-bg-success" style="margin-left: 25px;">Reply</button>
+                                        <button type="submit" class="btn btn-success">Reply</button>
                                     </form>
                                     {% endif %}
-                                </div>
-                                {% empty %}
-                                <p class="text-muted">No comments yet. Be the first to comment!</p>
-                                {% endfor %}
-                            </div>
 
-                            <!-- Add a Top-level Comment Form -->
-                            {% if user.is_authenticated %}
-                            <form method="post" class="mt-4">
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <textarea name="comment" class="form-control" rows="3" placeholder="Add a comment..."></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                            </form>
-                            {% else %}
-                            <p class="text-muted">You need to <a href="{% url 'login' %}">log in</a> to comment.</p>
-                            {% endif %}
+                            {% empty %}
+                            <p class="text-muted">No comments yet. Be the first to comment!</p>
+                            {% endfor %}
                         </div>
 
+                        <!-- Add a Top-level Comment Form -->
+                        {% if user.is_authenticated %}
+                        <form id="comment-form" method="post" 
+                        hx-post="{% url 'post-details' post.id %}" 
+                        hx-target="#comments-section"
+                        hx-swap="beforeend" 
+                        hx-debug="true">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <textarea name="comment" class="form-control" rows="3" placeholder="Add a comment..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                        {% else %}
+                        <p class="text-muted">You need to <a href="{% url 'login' %}">log in</a> to comment.</p>
+                        {% endif %}
+                    </div>
 
                     
                 </div>
@@ -128,40 +133,52 @@
     
     
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const likeButtons = document.querySelectorAll('.like-btn');
-    
-        likeButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const postId = this.getAttribute('data-post-id');
-    
-                fetch(`/post/like/${postId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                    body: JSON.stringify({}),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.liked) {
-                        btn.classList.remove('btn-outline-primary');
-                        btn.classList.add('btn-danger');
-                        btn.innerHTML = '<span class="fas fa-heart"></span> Unlike';
-                    } else {
-                        btn.classList.remove('btn-danger');
-                        btn.classList.add('btn-outline-primary');
-                        btn.innerHTML = '<span class="fa-regular fa-heart"></span> Like';
-                    }
-                    document.getElementById('likes-count-' + postId).textContent = data.total_likes + ' Likes';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+document.addEventListener('DOMContentLoaded', function() {
+    const likeButtons = document.querySelectorAll('.like-btn');
+
+    likeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const postId = this.getAttribute('data-post-id');
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value; 
+
+            fetch(`/post/like/${postId}/`, {  
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,  
+                },
+                body: JSON.stringify({}),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.liked) {
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-danger');
+                    btn.innerHTML = '<span class="fas fa-heart"></span> Unlike';
+                } else {
+                    btn.classList.remove('btn-danger');
+                    btn.classList.add('btn-outline-primary');
+                    btn.innerHTML = '<span class="fa-regular fa-heart"></span> Like';
+                }
+                document.getElementById('likes-count-' + postId).textContent = data.total_likes + ' Likes';
+
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
         });
     });
-    
+});
+
+
+document.addEventListener('htmx:afterRequest', function(event) {
+if (event.target.id.startsWith('comment-form') || event.target.id.startsWith('reply-form')) {
+    event.target.reset();
+}
+});
+
+
     </script>
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+
 {% endblock content %}

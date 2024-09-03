@@ -49,18 +49,14 @@
                             {% for request in all_requests %}
                                 <li class="card post-item bg-transparent border-0 mb-4">
                                     <div class="card-body px-0 d-flex align-items-center justify-content-between">
-                                        <img src="{{ request.user_from.profile.profile_img.url }}"  class="rounded-circle mr-2" width="40" height="40">
-
-                                        <div style="margin-left: -150px;">
-
-                                            <h4 class="card-title mb-0">
-                                                {{ request.user_from.username }}
-                                            </h4>
-                                            <p class="text-muted">sent you a friend request</p>
+                                        <img src="{{ request.user_from.profile.profile_img.url }}" class="rounded-circle mr-2" width="40" height="40">
+                                        <div class="ml-3">
+                                            <h4 class="card-title mb-0">{{ request.user_from.username }}</h4>
+                                            <p class="text-muted mb-0">sent you a friend request</p>
                                         </div>
                                         <div>
-                                            <a href="{% url 'accept-friend' request.user_from.id %}" class="btn btn-success mr-2">Accept</a>
-                                            <a href="{% url 'reject-friend' request.user_from.id %}" class="btn btn-danger">Reject</a>
+                                            <a href="{% url 'accept-friend' request.user_from.id %}" class="btn btn-success btn-sm mr-2">Accept</a>
+                                            <a href="{% url 'reject-friend' request.user_from.id %}" class="btn btn-danger btn-sm">Reject</a>
                                         </div>
                                     </div>
                                 </li>
@@ -78,11 +74,11 @@
                     {% if my_friends %}
                         <ul class="list-group">
                             {% for friend in my_friends %}
-                                <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center">
+                                <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center mb-3">
                                     <div class="d-flex align-items-center">
                                         <!-- Profile Picture -->
                                         {% if friend.user_from == request.user %}
-                                            <img src="{{ friend.user_to.profile.profile_img.url }}"  class="rounded-circle mr-3" width="40" height="40">
+                                            <img src="{{ friend.user_to.profile.profile_img.url }}" class="rounded-circle mr-3" width="40" height="40">
                                             <span>{{ friend.user_to.username }}</span>
                                         {% else %}
                                             <img src="{{ friend.user_from.profile.profile_img.url }}" class="rounded-circle mr-3" width="40" height="40">
@@ -94,13 +90,35 @@
                                     {% else %}
                                     <a href="{% url 'remove-friend' friend.user_from.id %}" class="btn btn-danger btn-sm">Unfriend</a>
                                     {% endif %}
-
-
                                 </li>
                             {% endfor %}
                         </ul>
                     {% else %}
                         <p class="text-white">You have no friends yet.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Right section: Outgoing Friend Requests -->
+                <div class="col-lg-4">
+                    <hr style="color: rgb(2, 133, 248);">
+                    <h2 class="text-white mb-4">Outgoing Friend Requests</h2>
+
+                    {% if outgoing_requests %}
+                        <ul class="list-group">
+                            {% for req in outgoing_requests %}
+                                <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <!-- Profile Picture -->
+                                        <img src="{{ req.user_to.profile.profile_img.url }}" class="rounded-circle mr-3" width="40" height="40">
+                                        <span>{{ req.user_to.username }}</span>
+                                    </div>
+                                    <!-- Cancel Request Button -->
+                                    <a href="{% url 'add-friend' req.user_to.id %}" class="btn btn-danger btn-sm">Cancel Request</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-white">You have not sent any friend requests yet.</p>
                     {% endif %}
                 </div>
                 

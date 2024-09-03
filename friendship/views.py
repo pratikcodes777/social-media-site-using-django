@@ -28,9 +28,10 @@ def add_friend(request, id):
         )
         if not created and friendship.status == 'Pending':
             friendship.delete()
-        return redirect('profile', username=user_to_add.username)
+            messages.warning(request , 'Request cancelled successfully')
+        return redirect('incoming-requests')
     except:
-        return redirect('profile', username=user_to_add.username)
+        return redirect('incoming-requests')
     
 
 
@@ -89,12 +90,16 @@ def friend_post(request):
 
 def incoming_requests(request):
     all_requests = Friendship.objects.filter(user_to = request.user , status = 'Pending')
+    outgoing_requests = Friendship.objects.filter(user_from = request.user , status = 'Pending')
     my_friends = Friendship.objects.filter(
         (Q(user_from=request.user) | Q(user_to=request.user)),
         status='Accepted'
     )
     context ={
         'all_requests': all_requests,
-        'my_friends': my_friends
+        'my_friends': my_friends, 
+        'outgoing_requests': outgoing_requests,
     }
     return render(request , 'friendship/incoming-requests.html', context)
+
+

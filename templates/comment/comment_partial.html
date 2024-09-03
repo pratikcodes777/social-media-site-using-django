@@ -1,0 +1,57 @@
+{% load static %}
+{% if comment %}
+    <div class="comment mb-4" id="comment-{{ comment.id }}">
+        <div class="d-flex align-items-center">
+            {% if comment.user.profile.profile_img %}
+                <img src="{{ comment.user.profile.profile_img.url }}" class="rounded-circle" alt="User Avatar" width="50" height="50">
+            {% else %}
+                <img src="{% static 'images/author-sm.png' %}" class="rounded-circle" alt="Default Avatar" width="50" height="50">
+            {% endif %}
+            <div class="ml-3">
+                <h5 class="mb-0 text-white">{{ comment.user.username }}</h5>
+                <small class="text-muted">{{ comment.created_at|date:"Y/m/d H:i" }}</small>
+            </div>
+        </div>
+        <p class="mt-2">{{ comment.content }}</p>
+
+        <!-- Replies -->
+        <div id="replies-{{ comment.id }}" class="replies ml-4">
+            {% include 'comment/reply_partial.html' with comments=comment.replies.all %}
+        </div>
+
+        <!-- Reply Form -->
+        {% if user.is_authenticated %}
+        <form method="post" id="reply-form-{{ comment.id }}" 
+        hx-post="{% url 'post-details' post.id %}" 
+        hx-target="#replies" 
+        hx-swap="beforeend">
+        {% csrf_token %}
+        <input type="hidden" name="parent_id" value="{{ comment.id }}">
+        <div class="form-group">
+            <textarea name="comment" class="form-control" rows="1" placeholder="Reply to this comment..." 
+                style="border: 1px dotted rgb(241, 178, 133); padding-left: 25px; max-width: 450px;"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Reply</button>
+    </form>
+        {% endif %}
+    </div>
+{% else %}
+    {% for comment in comments %}
+        <div class="comment mb-4" id="comment-{{ comment.id }}">
+            <div class="comment mb-4" id="comment-{{ comment.id }}">
+                <div class="d-flex align-items-center">
+                    {% if comment.user.profile.profile_img %}
+                        <img src="{{ comment.user.profile.profile_img.url }}" class="rounded-circle" alt="User Avatar" width="50" height="50">
+                    {% else %}
+                        <img src="{% static 'images/author-sm.png' %}" class="rounded-circle" alt="Default Avatar" width="50" height="50">
+                    {% endif %}
+                    <div class="ml-3">
+                        <h5 class="mb-0 text-white">{{ comment.user.username }}</h5>
+                        <small class="text-muted">{{ comment.created_at|date:"Y/m/d H:i" }}</small>
+                    </div>
+                </div>
+        </div>
+    {% empty %}
+        <!-- <p class="text-muted">No comments yet. Be the first to comment!</p> -->
+    {% endfor %}
+{% endif %}

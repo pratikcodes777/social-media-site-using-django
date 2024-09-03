@@ -1,353 +1,155 @@
 {% extends 'base.html' %}
 {% load static %}
+
+
 {% block content %}
+
 <body>
-    <!-- START preloader-wrapper -->
-    <!-- <div class="preloader-wrapper">
-        <div class="preloader-inner">
-            <div class="spinner-border text-red"></div>
-        </div>
-    </div> -->
-    <!-- END preloader-wrapper -->
-    
+  
     <!-- START main-wrapper -->
     <section class="d-flex">
   
-<!-- start of sidenav -->
-<aside><div class="sidenav position-sticky d-flex flex-column justify-content-between">
-    <a class="navbar-brand" href="{% url 'index' %}" class="logo">
-        <img src="{% static 'images/logo.png' %}" alt="">
-    </a>
-    <!-- end of navbar-brand -->
-    <form class="d-flex" role="search" method="POST" action="{% url 'search' %}">
-        {% csrf_token %}
-        <input
-            class="form-control me-2"
-            type="search"
-            placeholder="Search"
-            name="search_query"
-            required
-            aria-label="Search"
-        >
-        <button class="btn btn-outline-success" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-    </form>
+        <!-- start of sidenav -->
+        <aside>
+            <div class="sidenav position-sticky d-flex flex-column justify-content-between">
+                <a class="navbar-brand" href="{% url 'index' %}" class="logo">
+                    <img src="{% static 'images/logo.png' %}" alt="">
+                </a>
+                <!-- end of navbar-brand -->
+                <form class="d-flex" role="search" method="POST" action="{% url 'search' %}">
+                    {% csrf_token %}
+                    <input
+                        class="form-control me-2"
+                        type="search"
+                        placeholder="Search"
+                        name="search_query"
+                        required
+                        aria-label="Search"
+                    >
+                    <button class="btn btn-outline-success" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </form>
 
-    {% include 'navbar.html' %}
-    <!-- end of navbar -->
+                {% include 'navbar.html' %}
+                <!-- end of navbar -->
 
-    <ul class="list-inline nml-2">
-        <li class="list-inline-item">
-            <a href="#!" class="text-white text-red-onHover pr-2">
-                <span class="fab fa-twitter"></span>
-            </a>
-        </li>
-        <li class="list-inline-item">
-            <a href="#!" class="text-white text-red-onHover p-2">
-                <span class="fab fa-facebook-f"></span>
-            </a>
-        </li>
-        <li class="list-inline-item">
-            <a href="#!" class="text-white text-red-onHover p-2">
-                <span class="fab fa-instagram"></span>
-            </a>
-        </li>
-        <li class="list-inline-item">
-            <a href="#!" class="text-white text-red-onHover p-2">
-                <span class="fab fa-linkedin-in"></span>
-            </a>
-        </li>
-    </ul>
-    <!-- end of social-links -->
-</div></aside>
-<!-- end of sidenav -->
-    <div class="main-content">
-
-{% include 'messages.html' %}
-        <div class="container pt-4 mt-5">
-            <div class="row justify-content-between">
-                <div class="col-lg-7">
-                    {% for post in page_obj %}
-                    <div class="card post-item bg-transparent border-0 mb-5">
-                        <a href="{% url 'post-details' post.id %}">
-                            <img class="card-img-top rounded-0" src="{{post.image.url}}" alt="">
+                <ul class="list-inline nml-2">
+                    <li class="list-inline-item">
+                        <a href="#!" class="text-white text-red-onHover pr-2">
+                            <span class="fab fa-twitter"></span>
                         </a>
-                        <div class="card-body px-0">
-                            <h2 class="card-title">
-                                <a class="text-white opacity-75-onHover" href="{% url 'post-details' post.id %}">{{post.title}}</a>
-                            </h2>
-                            <ul class="post-meta mt-3">
-                                <li class="d-inline-block mr-3">
-                                    <span class="fas fa-clock text-primary"></span>
-                                    <a class="ml-1" href="#">{{ post.created_at|date:"F j, Y" }}</a>
-                                </li>
-                                <li class="d-inline-block">
-                                    <span class="fas fa-user-alt text-primary"></span>
-                                    <a class="ml-1" href="{% url 'profile' post.user.username %}" style="margin-right: 30px;">
-                                        {{post.user.username}}
-                                    </a>
-                
-                                    {% if user.is_authenticated %}
-                                    <button class="btn btn-outline-primary like-btn" data-post-id="{{ post.id }}">
-                                        {% if post.is_liked %}
-                                        <span class="fas fa-heart"></span> Unlike
-                                        {% else %}
-                                        <span class="fa-regular fa-heart"></span> Like
-                                        {% endif %}
-                                    </button>
-                                    {% endif %}
-                                    <span id="likes-count-{{ post.id }}">{{ post.total_likes }} Likes</span>
-                                </li>
-                            </ul>
-                            <p class="card-text my-4">{{post.caption}}</p>
-                            <a href="{% url 'post-details' post.id %}" class="btn btn-primary">
-                                Read More <img src="{% static 'images/arrow-right.png' %}" alt="">
-                            </a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    <!-- end of post-item -->
-                </div>
-
-
-                <div class="col-lg-4 col-md-5">
-                {% if user.is_authenticated %}
-
-                    <div class="widget text-center">
-                        <img class="author-thumb-sm rounded-circle d-block mx-auto" src="{{ profile.profile_img.url }}" alt="">
-                        <h2 class="widget-title text-white d-inline-block mt-4">About Me</h2>
-                        <p class="mt-4">
-                            Hello,{{user.username}} here. My email goes by: 
-                            <strong>{{ user.email }}</strong>. <br> Here's a little about me: 
-                            "{{ profile.bio }}".  <br>
-                            I currently reside in 
-                            {{ profile.location }}.
-                        </p>
-                        <a class="btn btn-primary" href="{% url 'profile' profile.user.username %}">My Profile</a>
-                        <ul class="list-inline mt-3">
-                            <li class="list-inline-item">
-                                <a href="#!" class="text-white text-primary-onHover p-2">
-                                    <span class="fab fa-twitter"></span>
-                                </a>
-                            </li>
-                            <li class="list-inline-item">
-                                <a href="#!" class="text-white text-primary-onHover p-2">
-                                    <span class="fab fa-facebook-f"></span>
-                                </a>
-                            </li>
-                            <li class="list-inline-item">
-                                <a href="#!" class="text-white text-primary-onHover p-2">
-                                    <span class="fab fa-instagram"></span>
-                                </a>
-                            </li>
-                            <li class="list-inline-item">
-                                <a href="#!" class="text-white text-primary-onHover p-2">
-                                    <span class="fab fa-linkedin-in"></span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    {% endif %}
-                    <!-- end of author-widget -->
-
-                    <div class="widget bg-dark p-4 text-center">
-                        <h2 class="widget-title text-white d-inline-block mt-4">Subscribe Blog</h2>
-                        <p class="mt-4">Lorem ipsum dolor sit coectetur elit. Tincidu nfywjt leo mi, urna. Arcu ve isus, condimentum ut vulpate cursus por.</p>
-                        <form action="#">
-                            <div class="form-group">
-                                <input type="email" class="form-control bg-transparent rounded-0 my-4" placeholder="Your Email Address">
-                                <button class="btn btn-primary">Subscribe Now <img src="{% static 'images/arrow-right.png' %}" alt=""></button>
-                            </div>
-                        </form>
-                    </div>
-                    <!-- end of subscription-widget -->
-
-                    <div class="widget">
-                        <div class="mb-5 text-center">
-                            <h2 class="widget-title text-white d-inline-block">Featured Posts</h2>
-                        </div>
-                        <div class="card post-item bg-transparent border-0 mb-5">
-                            <a href="post-details.html">
-                                <img class="card-img-top rounded-0" src="{% static 'images/post/post-sm/01.png' %}" alt="">
-                            </a>
-                            <div class="card-body px-0">
-                                <h2 class="card-title">
-                                    <a class="text-white opacity-75-onHover" href="post-details.html">Excepteur ado Do minimal duis laborum Fugiat ea</a>
-                                </h2>
-                                <ul class="post-meta mt-3 mb-4">
-                                    <li class="d-inline-block mr-3">
-                                        <span class="fas fa-clock text-primary"></span>
-                                        <a class="ml-1" href="#">24 April, 2016</a>
-                                    </li>
-                                    <li class="d-inline-block">
-                                        <span class="fas fa-list-alt text-primary"></span>
-                                        <a class="ml-1" href="#">Photography</a>
-                                    </li>
-                                </ul>
-                                <a href="post-details.html" class="btn btn-primary">Read More <img src="{% static 'images/arrow-right.png' %}" alt=""></a>
-                            </div>
-                        </div>
-                        <!-- end of widget-post-item -->
-                        <div class="card post-item bg-transparent border-0 mb-5">
-                            <a href="post-details.html">
-                                <img class="card-img-top rounded-0" src="{% static 'images/post/post-sm/02.png' %}" alt="">
-                            </a>
-                            <div class="card-body px-0">
-                                <h2 class="card-title">
-                                    <a class="text-white opacity-75-onHover" href="post-details.html">Excepteur ado Do minimal duis laborum Fugiat ea</a>
-                                </h2>
-                                <ul class="post-meta mt-3 mb-4">
-                                    <li class="d-inline-block mr-3">
-                                        <span class="fas fa-clock text-primary"></span>
-                                        <a class="ml-1" href="#">24 April, 2016</a>
-                                    </li>
-                                    <li class="d-inline-block">
-                                        <span class="fas fa-list-alt text-primary"></span>
-                                        <a class="ml-1" href="#">Photography</a>
-                                    </li>
-                                </ul>
-                                <a href="post-details.html" class="btn btn-primary">Read More <img src="{% static 'images/arrow-right.png' %}" alt=""></a>
-                            </div>
-                        </div>
-                        <!-- end of widget-post-item -->
-                    </div>
-                    <!-- end of post-items widget -->
-                </div>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="#!" class="text-white text-red-onHover p-2">
+                            <span class="fab fa-facebook-f"></span>
+                        </a>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="#!" class="text-white text-red-onHover p-2">
+                            <span class="fab fa-instagram"></span>
+                        </a>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="#!" class="text-white text-red-onHover p-2">
+                            <span class="fab fa-linkedin-in"></span>
+                        </a>
+                    </li>
+                </ul>
+                <!-- end of social-links -->
             </div>
-        </div>
+        </aside>
+        <!-- end of sidenav -->
 
-        <div class="pagination-wrapper" style="display: flex; justify-content: center; align-items: center;">
-            <nav aria-label="Page navigation">
-                <ul class="pagination">
-                    {% if page_obj.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">&laquo;</span>
-                        </li>
-                    {% endif %}
-        
-                    {% for num in page_obj.paginator.page_range %}
-                        {% if page_obj.number == num %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% else %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
+        <div class="main-content" style="position: relative;">
+            <div class="container pt-4 mt-5">
+                <div class="row">
+                    <!-- start of post list -->
+                    <div class="col-lg-9">
+                    {% include 'messages.html' %}
+
+                        {% include 'post_list.html' with page_obj=page_obj %}
+                    </div>
+                    <!-- end of post list -->
+
+                    <!-- <div class="col-lg-3 d-none d-lg-block">
+                        {% if user.is_authenticated %}
+                            <div class="widget text-center" sty>
+                                <img class="author-thumb-sm rounded-circle d-block mx-auto" src="{{ profile.profile_img.url }}" alt="">
+                                <h2 class="widget-title text-white d-inline-block mt-4">About Me</h2>
+                                <p class="mt-4">
+                                    Hello, {{ user.username }} here. My email goes by: 
+                                    <strong>{{ user.email }}</strong>. <br> Here's a little about me: 
+                                    "{{ profile.bio }}". <br>
+                                    I currently reside in 
+                                    {{ profile.location }}.
+                                </p>
+                                <a class="btn btn-primary" href="{% url 'profile' profile.user.username %}">My Profile</a>
+                                <ul class="list-inline mt-3">
+                                    <li class="list-inline-item">
+                                        <a href="#!" class="text-white text-primary-onHover p-2">
+                                            <span class="fab fa-twitter"></span>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a href="#!" class="text-white text-primary-onHover p-2">
+                                            <span class="fab fa-facebook-f"></span>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a href="#!" class="text-white text-primary-onHover p-2">
+                                            <span class="fab fa-instagram"></span>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a href="#!" class="text-white text-primary-onHover p-2">
+                                            <span class="fab fa-linkedin-in"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         {% endif %}
-                    {% endfor %}
-        
-                    {% if page_obj.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">&raquo;</span>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-        
-
-        <!-- start of footer -->
-<footer class="bg-dark">
-    <div class="container">
-        <div class="row text-center">
-            <div class="col-lg-3 col-sm-6 mb-5">
-                <h5 class="font-primary text-white mb-4">Inspirations</h5>
-                <ul class="list-unstyled">
-                    <li><a href="#!">Privacy State</a></li>
-                    <li><a href="#!">Privacy</a></li>
-                    <li><a href="#!">State</a></li>
-                    <li><a href="#!">Privacy</a></li>
-                </ul>
-            </div>
-            <div class="col-lg-3 col-sm-6 mb-5">
-                <h5 class="font-primary text-white mb-4">Templates</h5>
-                <ul class="list-unstyled">
-                    <li><a href="#!">Privacy State</a></li>
-                    <li><a href="#!">Privacy</a></li>
-                    <li><a href="#!">State</a></li>
-                    <li><a href="#!">Privacy</a></li>
-                </ul>
-            </div>
-            <div class="col-lg-3 col-sm-6 mb-5">
-                <h5 class="font-primary text-white mb-4">Resource</h5>
-                <ul class="list-unstyled">
-                    <li><a href="#!">Privacy State</a></li>
-                    <li><a href="#!">Privacy</a></li>
-                    <li><a href="#!">State</a></li>
-                    <li><a href="#!">Privacy</a></li>
-                </ul>
-            </div>
-            <div class="col-lg-3 col-sm-6 mb-5">
-                <h5 class="font-primary text-white mb-4">Company</h5>
-                <ul class="list-unstyled">
-                    <li><a href="#!">Privacy State</a></li>
-                    <li><a href="#!">Privacy</a></li>
-                    <li><a href="#!">State</a></li>
-                    <li><a href="#!">Privacy</a></li>
-                </ul>
+                    </div> -->
+                </div>
             </div>
         </div>
-    </div>
-</footer>
-<!-- end of footer -->
-    </div>
 
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const likeButtons = document.querySelectorAll('.like-btn');
+            
+                likeButtons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const postId = this.getAttribute('data-post-id');
+            
+                        fetch(`/post/like/${postId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                            },
+                            body: JSON.stringify({}),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.liked) {
+                                btn.classList.remove('btn-outline-primary');
+                                btn.classList.add('btn-danger');
+                                btn.innerHTML = '<span class="fas fa-heart"></span> Unlike';
+                            } else {
+                                btn.classList.remove('btn-danger');
+                                btn.classList.add('btn-outline-primary');
+                                btn.innerHTML = '<span class="fa-regular fa-heart"></span> Like';
+                            }
+                            document.getElementById('likes-count-' + postId).textContent = data.total_likes + ' Likes';
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                    });
+                });
+            });
+        </script>
+    
     </section>
     <!-- END main-wrapper -->
-
-
 </body>
-
-
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const likeButtons = document.querySelectorAll('.like-btn');
-
-    likeButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const postId = this.getAttribute('data-post-id');
-
-            fetch(`/post/like/${postId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify({}),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.liked) {
-                    btn.classList.remove('btn-outline-primary');
-                    btn.classList.add('btn-danger');
-                    btn.innerHTML = '<span class="fas fa-heart"></span> Unlike';
-                } else {
-                    btn.classList.remove('btn-danger');
-                    btn.classList.add('btn-outline-primary');
-                    btn.innerHTML = '<span class="fa-regular fa-heart"></span> Like';
-                }
-                document.getElementById('likes-count-' + postId).textContent = data.total_likes + ' Likes';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    });
-});
-
-</script>
 {% endblock content %}

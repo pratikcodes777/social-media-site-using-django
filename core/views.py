@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.contrib import auth
 from django.contrib import messages
 from .models import User, Profile
@@ -8,31 +9,40 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 # Create your views here.
 
+
 def index(request):
     all_posts = Post.objects.all().order_by('-created_at')
-    paginator = Paginator(all_posts , 5)
+    paginator = Paginator(all_posts, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     profile = None
+    
     if request.user.is_authenticated:
         try:
             profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
             profile = None
-
+        
         for post in all_posts:
             post.is_liked = post.likes.filter(user=request.user).exists()
-    
     else:
         for post in all_posts:
             post.is_liked = False
 
+    if getattr(request, 'htmx', False):
+        template_name = 'post/post_list.html'
+    else:
+        template_name = 'index.html'
+
     context = {
         'profile': profile,
         'all_posts': all_posts,
-        'page_obj': page_obj,
+        'page_obj': page_obj
     }
-    return render(request, 'index.html', context)
+    
+    return render(request, template_name, context)
+
+
 
 
 def register(request):

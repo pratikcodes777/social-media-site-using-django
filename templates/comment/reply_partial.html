@@ -1,0 +1,30 @@
+{% load static %}
+{% for reply in comments %}
+    <div class="reply mb-3" id="reply-{{ reply.id }}">
+        <p class="text-muted">{{ reply.user.username }} replied:</p>
+        <p>{{ reply.content }}</p>
+
+        <!-- Replies to Replies -->
+        <div id="replies-{{ reply.id }}" class="replies ml-4">
+            {% include 'comment/reply_partial.html' with comments=reply.replies.all %}
+        </div>
+
+        <!-- Reply Form -->
+            {% if user.is_authenticated %}
+            <form method="post" id="reply-form-{{ reply.id }}" 
+                hx-post="{% url 'post-details' reply.post.id %}" 
+                hx-target="#replies-{{ reply.id }}"  
+                hx-swap="beforeend" 
+                hx-debug="true">
+                {% csrf_token %}
+                <input type="hidden" name="parent_id" value="{{ reply.id }}">
+                <div class="form-group">
+                    <textarea name="comment" class="form-control" rows="1" placeholder="Reply to this reply..." 
+                        style="border: 1px dotted rgb(241, 178, 133); padding-left: 25px; max-width: 450px;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Reply</button>
+            </form>
+            {% endif %}
+
+    </div>
+{% endfor %}

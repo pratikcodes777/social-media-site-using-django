@@ -1,8 +1,12 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
+from django.templatetags.static import static
+from django.utils import timezone
 from django.http import JsonResponse
+import json
 from .models import Post, Comment, Like
 from core.models import Profile
 from django.contrib import messages
+from django.template.loader import render_to_string
 # Create your views here.
 
 
@@ -53,8 +57,8 @@ def post_details(request, post_id):
 
 def post_details(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    comments = post.comments.filter(parent=None)  
-    
+    comments = post.comments.filter(parent=None)
+
     is_liked = False
     if request.user.is_authenticated:
         is_liked = Like.objects.filter(post=post, user=request.user).exists()
@@ -63,16 +67,28 @@ def post_details(request, post_id):
         content = request.POST.get('comment')
         parent_id = request.POST.get('parent_id')
         parent_comment = None
-        if parent_id:  
+        if parent_id:
             parent_comment = Comment.objects.get(id=parent_id)
 
         if content:
-            Comment.objects.create(
+            new_comment = Comment.objects.create(
                 post=post,
                 user=request.user,
                 content=content,
-                parent=parent_comment  # If parent_comment is None, it's a top-level comment on the post
+                parent=parent_comment
             )
+
+            if request.headers.get('HX-Request') == 'true':
+                context = {'comment': new_comment}
+
+                if parent_comment:
+                    context = {'comments': parent_comment.replies.all()}
+                    html = render_to_string('comment/reply_partial.html', context)
+                else:
+                    html = render_to_string('comment/comment_partial.html', context)
+                
+                return HttpResponse(html)
+
             return redirect('post-details', post_id=post.id)
 
     context = {
@@ -82,6 +98,7 @@ def post_details(request, post_id):
     }
 
     return render(request, 'post/post-details.html', context)
+
 
 
 
