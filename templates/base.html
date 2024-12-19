@@ -1,13 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
 
-<!--
- // WEBSITE: https://themefisher.com
- // TWITTER: https://twitter.com/themefisher
- // FACEBOOK: https://www.facebook.com/themefisher
- // GITHUB: https://github.com/themefisher/
--->
-
 <html>
 <head>
     <meta charset="utf-8">
@@ -50,6 +43,13 @@
 
     <!-- Main Script -->
     <script src="{% static 'js/script.js' %}"></script>
-
+    <script>
+        document.addEventListener('htmx:configRequest', (event) => {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            if (csrfToken) {
+                event.detail.headers['X-CSRFToken'] = csrfToken;
+            }
+        });
+    </script>
 
 </html>

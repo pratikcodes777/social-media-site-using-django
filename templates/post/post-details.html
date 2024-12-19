@@ -79,7 +79,7 @@
                                     <p class="mt-2">{{ comment.content }}</p>
 
                                     <!-- Replies -->
-                                        <div id="replies">
+                                        <div>
                                     <div id="replies-{{ comment.id }}" class="replies ml-4">
                                         {% include 'comment/reply_partial.html' with comments=comment.replies.all %}
                                     </div>
